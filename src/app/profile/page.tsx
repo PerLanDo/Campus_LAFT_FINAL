@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { User } from "@supabase/auth-js";
-import { Profile, ItemStatus } from "@/types/database"; // Added ItemStatus import
+import { Profile, ItemStatusValues } from "@/types/database";
 import Image from "next/image";
 
 export default function ProfilePage() {
@@ -80,8 +80,8 @@ export default function ProfilePage() {
         if (!itemsError && itemsData) {
           // Calculate total, found, and lost items
           const totalItems = itemsData.length;
-          const foundItems = itemsData.filter(item => item.status === ItemStatus.FOUND);
-          const lostItems = itemsData.filter(item => item.status === ItemStatus.LOST);
+          const foundItems = itemsData.filter(item => item.status === 'found');
+          const lostItems = itemsData.filter(item => item.status === 'lost');
           
           setTotalItemsReported(totalItems);
           setFoundItemsCount(foundItems.length);

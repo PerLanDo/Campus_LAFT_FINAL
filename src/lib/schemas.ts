@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { CategoryNames, ItemStatus } from '@/types/database';
+import { CategoryNames, ItemStatusValues } from '@/types/database';
+import type { ItemStatus } from '@/types/database';
 
 // Max file size (e.g., 5MB)
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -7,7 +8,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 export const reportItemSchema = z.object({
-  status: z.nativeEnum(ItemStatus, {
+  status: z.enum(ItemStatusValues as unknown as [string, ...string[]], {
     errorMap: () => ({ message: 'Please select if the item is lost or found.' }),
   }),
   title: z.string()

@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import { Item, ItemStatus, Claim, Profile, ClaimStatus, CategoryNames } from "@/types/database";
+import { Item, Claim, Profile, CategoryNames, ItemStatusValues, ClaimStatusValues } from "@/types/database";
+import type { ItemStatus, ClaimStatus } from "@/types/database";
 import { format } from "date-fns";
 import ItemDetailActions from "./ItemDetailActions";
 import ManageClaimsClient from "@/components/ManageClaimsClient";
@@ -104,9 +105,9 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
             <div className="flex flex-wrap items-center gap-2 mb-5">
               <span
                 className={`px-3 py-1 rounded-full text-xs font-semibold ${ 
-                  item.status === ItemStatus.LOST
+                  item.status === 'lost'
                     ? "bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-100"
-                    : item.status === ItemStatus.FOUND
+                    : item.status === 'found'
                     ? "bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100"
                     : "bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100"
                 }`}

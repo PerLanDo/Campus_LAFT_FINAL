@@ -41,7 +41,7 @@ export default function ManageClaimsClient({
   const [expanded, setExpanded] = useState(false);
 
   const pendingCount = claims.filter(
-    (c) => c.status === ClaimStatus.PENDING
+    (c) => c.status === 'pending'
   ).length;
 
   const handleClaimAction = async (
@@ -49,7 +49,7 @@ export default function ManageClaimsClient({
     action: "approve" | "reject"
   ) => {
     if (!currentUserId || !isOwner) return;
-    if (itemStatus === ItemStatus.CLAIMED && action === "approve") {
+    if (itemStatus === 'claimed' && action === "approve") {
       setError("This item has already been marked as claimed.");
       return;
     }
@@ -58,7 +58,7 @@ export default function ManageClaimsClient({
     setError(null);
 
     const newClaimStatus =
-      action === "approve" ? ClaimStatus.APPROVED : ClaimStatus.REJECTED;
+      action === "approve" ? 'approved' : 'rejected';
 
     // Update claim
     const { error: claimUpdateError } = await supabase
@@ -107,22 +107,22 @@ export default function ManageClaimsClient({
     if (action === "approve") {
       const { error: itemUpdateError } = await supabase
         .from("items")
-        .update({ status: ItemStatus.CLAIMED })
+        .update({ status: 'claimed' })
         .eq("id", itemId);
 
       if (itemUpdateError) {
         setError(`Failed to update item status: ${itemUpdateError.message}`);
       } else {
-        setItemStatus(ItemStatus.CLAIMED);
+        setItemStatus('claimed');
         // Reject other pending claims
         const otherPendingClaims = claims.filter(
-          (c) => c.id !== claimId && c.status === ClaimStatus.PENDING
+          (c) => c.id !== claimId && c.status === 'pending'
         );
         for (const otherClaim of otherPendingClaims) {
           await supabase
             .from("claims")
             .update({
-              status: ClaimStatus.REJECTED,
+              status: 'rejected',
               date_resolved: new Date().toISOString(),
               resolved_by_user_id: currentUserId,
             })
@@ -140,10 +140,10 @@ export default function ManageClaimsClient({
               status: newClaimStatus,
               date_resolved: new Date().toISOString(),
             }
-          : action === "approve" && c.status === ClaimStatus.PENDING
+          : action === "approve" && c.status === 'pending'
           ? {
               ...c,
-              status: ClaimStatus.REJECTED,
+              status: 'rejected',
               date_resolved: new Date().toISOString(),
             }
           : c
@@ -154,23 +154,23 @@ export default function ManageClaimsClient({
   };
 
 
-  const getStatusProps = (status: ClaimStatus) => {
+  const getStatusProps = (status: string) => {
     switch (status) {
-      case ClaimStatus.PENDING:
+      case 'pending':
         return {
           colorClass:
             "bg-yellow-100 border-yellow-400 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-100 dark:border-yellow-700",
           accentClass: "bg-yellow-400",
           icon: "⏳",
         };
-      case ClaimStatus.APPROVED:
+      case 'approved':
         return {
           colorClass:
             "bg-green-50 border-green-400 text-green-900 dark:bg-green-900 dark:text-green-100 dark:border-green-700",
           accentClass: "bg-green-400",
           icon: "✅",
         };
-      case ClaimStatus.REJECTED:
+      case 'rejected':
       default:
         return {
           colorClass:
@@ -182,12 +182,12 @@ export default function ManageClaimsClient({
   };
 
   // Case 1: Non-owner, and (there are claims OR item is finalized) -> show nothing from this component for claim list
-  if (!isOwner && (claims.length > 0 || itemStatus === ItemStatus.CLAIMED || itemStatus === ItemStatus.ARCHIVED)) {
+  if (!isOwner && (claims.length > 0 || itemStatus === 'claimed' || itemStatus === 'archived')) {
     return null;
   }
 
   // Case 2: Item is LOST or FOUND, and no claims yet (message visible to owner & non-owner)
-  if ((itemStatus === ItemStatus.LOST || itemStatus === ItemStatus.FOUND) && claims.length === 0) {
+  if ((itemStatus === 'lost' || itemStatus === 'found') && claims.length === 0) {
     return (
       <div className="text-center py-4 text-gray-600 dark:text-gray-400">
         <p className="italic">No claims have been submitted for this item yet.</p>
@@ -206,7 +206,7 @@ export default function ManageClaimsClient({
   }
 
   // Case 3: Owner, item is CLAIMED or ARCHIVED, and no claims exist (e.g. direct status update without formal claim)
-  if (isOwner && (itemStatus === ItemStatus.CLAIMED || itemStatus === ItemStatus.ARCHIVED) && claims.length === 0) {
+  if (isOwner && (itemStatus === 'claimed' || itemStatus === 'archived') && claims.length === 0) {
      return (
         <div className="text-center py-4 text-gray-600 dark:text-gray-400">
           <p>This item has been marked as {itemStatus.toLowerCase()} and has no associated claim history to display.</p>
@@ -299,7 +299,7 @@ export default function ManageClaimsClient({
             )}
 
             {/* Status Message */}
-            {itemStatus === ItemStatus.CLAIMED && (
+            {itemStatus === 'claimed' && (
               <div className="flex items-center gap-3 mb-6 bg-green-900 bg-opacity-30 border border-green-700 rounded-lg px-4 py-3">
                 <svg
                   className="w-6 h-6 text-green-400"
@@ -428,8 +428,8 @@ export default function ManageClaimsClient({
 
                         {/* Action Buttons */}
                         {isOwner &&
-                          claim.status === ClaimStatus.PENDING &&
-                          itemStatus !== ItemStatus.CLAIMED && (
+                          claim.status === 'pending' &&
+                          itemStatus !== 'claimed' && (
                             <div className="mt-4 flex flex-wrap gap-3">
                               <button
                                 onClick={() =>

@@ -5,7 +5,8 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { reportItemSchema, ReportItemFormData } from "@/lib/schemas";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { ItemStatus, Item, CategoryNames } from "@/types/database";
+import { Item, CategoryNames } from "@/types/database";
+
 import Image from "next/image";
 import * as tf from "@tensorflow/tfjs";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
@@ -40,7 +41,7 @@ export default function EditItemPage() {
   } = useForm<ReportItemFormData>({
     resolver: zodResolver(reportItemSchema),
     defaultValues: {
-      status: ItemStatus.LOST,
+      status: 'lost',
       category: 'other',
       isUrgent: false,
       title: '',
@@ -99,7 +100,7 @@ export default function EditItemPage() {
       // Set form values
       reset({
         ...data,
-        status: data.status || ItemStatus.LOST,
+        status: data.status || 'lost',
         category: categoryKey,
         isUrgent: data.is_urgent || false,
         title: data.title || '',
@@ -259,8 +260,8 @@ export default function EditItemPage() {
             {...register('status')}
             className={`mt-1 block w-full px-3 py-2 border ${errors.status ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white`}
           >
-            <option value={ItemStatus.LOST}>Lost Item</option>
-            <option value={ItemStatus.FOUND}>Found Item</option>
+            <option value={'lost'}>Lost Item</option>
+            <option value={'found'}>Found Item</option>
           </select>
           {errors.status && <p className="mt-1 text-xs text-red-500">{errors.status.message}</p>}
         </div>
@@ -319,7 +320,7 @@ export default function EditItemPage() {
         </div>
         <div>
           <label htmlFor="dateLostOrFound" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Date {currentStatus === ItemStatus.LOST ? 'Lost' : 'Found'} <span className="text-red-500">*</span>
+            Date {currentStatus === 'lost' ? 'Lost' : 'Found'} <span className="text-red-500">*</span>
           </label>
           <input
             type="datetime-local"

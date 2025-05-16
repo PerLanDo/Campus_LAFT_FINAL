@@ -6,7 +6,8 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { reportItemSchema, ReportItemFormData } from '@/lib/schemas';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { CategoryNames, CategoryType, ItemStatus } from '@/types/database';
+import { CategoryNames, CategoryNamesValues, ItemStatusValues } from '@/types/database';
+import type { CategoryType, ItemStatus } from '@/types/database';
 import Image from 'next/image';
 import * as tf from '@tensorflow/tfjs';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
@@ -36,7 +37,7 @@ export default function ReportPage() {
   } = useForm<ReportItemFormData>({
     resolver: zodResolver(reportItemSchema),
     defaultValues: {
-      status: ItemStatus.LOST,
+      status: 'lost' as ItemStatus,
       category: 'other', // Default to 'other' category
       isUrgent: false,
       title: '',
@@ -229,8 +230,8 @@ export default function ReportPage() {
             {...register('status')}
             className={`mt-1 block w-full px-3 py-2 border ${errors.status ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white`}
           >
-            <option value={ItemStatus.LOST}>Lost Item</option>
-            <option value={ItemStatus.FOUND}>Found Item</option>
+            <option value={'lost'}>Lost Item</option>
+            <option value={'found'}>Found Item</option>
           </select>
           {errors.status && <p className="mt-1 text-xs text-red-500">{errors.status.message}</p>}
         </div>
@@ -294,7 +295,7 @@ export default function ReportPage() {
 
         <div>
           <label htmlFor="dateLostOrFound" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Date {currentStatus === ItemStatus.LOST ? 'Lost' : 'Found'} <span className="text-red-500">*</span>
+            Date {currentStatus === 'lost' ? 'Lost' : 'Found'} <span className="text-red-500">*</span>
           </label>
           <input
             type="datetime-local"

@@ -11,38 +11,45 @@ export const CategoryNames = {
   'other': 'Other'
 } as const;
 
+// Create value arrays for runtime use
+export const CategoryNamesValues = [
+  'electronics',
+  'apparel',
+  'books',
+  'stationery',
+  'accessories',
+  'documents',
+  'ids_cards',
+  'keys',
+  'other'
+] as const;
+
 export type CategoryType = keyof typeof CategoryNames;
 
-export enum ItemStatus {
-  LOST = 'lost',
-  FOUND = 'found',
-  CLAIMED = 'claimed',
-  ARCHIVED = 'archived'
-}
+// Define both type and values for ItemStatus
+export type ItemStatus = 'lost' | 'found' | 'claimed' | 'archived';
+export const ItemStatusValues: ItemStatus[] = ['lost', 'found', 'claimed', 'archived'];
 
-export enum ClaimStatus {
-  PENDING = 'pending',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  RETRACTED = 'retracted',
-}
+// Define both type and values for ClaimStatus
+export type ClaimStatus = 'pending' | 'approved' | 'rejected' | 'retracted';
+export const ClaimStatusValues: ClaimStatus[] = ['pending', 'approved', 'rejected', 'retracted'];
 
 export interface Item {
   id: string;
-  user_id?: string;
+  user_id: string;
   title: string;
   description?: string;
   category_id: number;
   category?: string; // For display purposes
-  status: ItemStatus | string;
-  location_description?: string;
+  status: ItemStatus;
+  location_description?: string | null;
   lat?: number;
   lng?: number;
   image_url?: string;
   image_urls?: string[];
-  image_labels?: any;
+  image_labels?: Record<string, unknown>;
   image_caption?: string;
-  date_reported?: string;
+  date_reported?: string | null;
   date_lost_or_found?: string;
   found_by_user_id?: string;
   is_urgent?: boolean;

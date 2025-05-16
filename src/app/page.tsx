@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Item, ItemStatus, CategoryNames } from '@/types/database';
+import { Item, ItemStatusValues, CategoryNames, CategoryNamesValues } from '@/types/database';
 import { formatDistanceToNow } from 'date-fns';
 import { SearchBar } from '@/components/SearchBar';
 import { FilterControls, FilterState } from '@/components/FilterControls';
@@ -174,14 +174,14 @@ export default function HomePage() {
                     return categoryColorMap[category.toLowerCase()] || '#e6d8c3';
                   };
 
-                  if (item.status === ItemStatus.FOUND) {
+                  if (item.status === 'found') {
                     cardDynamicStyles = { backgroundColor: "#252c3a", borderWidth: "5px", borderColor: "#5cb25d"};
                     urgentBadgeStyle = { backgroundColor: greenShade };
                     statusBadgeStyle = { backgroundColor: greenShade };
                     statusBadgeClasses += " text-white";
                     categoryBadgeStyle = { backgroundColor: getCategoryColor(item.category), borderColor: greenShade };
                     categoryBadgeClasses += " text-white";
-                  } else if (item.status === ItemStatus.LOST) {
+                  } else if (item.status === 'lost') {
                     cardDynamicStyles = { backgroundColor: "#252c3a", borderWidth: "4px",borderColor: redShade };
                     urgentBadgeStyle = { backgroundColor: redShade };
                     statusBadgeStyle = { backgroundColor: redShade };
@@ -241,12 +241,12 @@ export default function HomePage() {
                           <h2 className="text-lg font-bold text-white mb-1 truncate group-hover:text-gray-200 dark:group-hover:text-gray-200">
                             {item.title}
                           </h2>
-                          <p className="text-xs text-gray-300 dark:text-gray-400 mb-1 truncate" title={item.location_description}>
-                            <span className="font-medium text-gray-100 dark:text-gray-300">Location:</span> {item.location_description}
+                          <p className="text-xs text-gray-300 dark:text-gray-400 mb-1 truncate" title={item.location_description || undefined}>
+                            <span className="font-medium text-gray-100 dark:text-gray-300">Location:</span> {item.location_description || 'No location provided'}
                           </p>
                           <div className="mt-auto">
                             <p className="text-[12px] text-gray-300 dark:text-gray-500 mt-2">
-                              Reported {formatDateAgo(item.date_reported)}
+                              Reported {formatDateAgo(item.date_reported || undefined)}
                             </p>
                           </div>
                         </div>

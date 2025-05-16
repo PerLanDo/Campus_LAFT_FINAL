@@ -4,16 +4,22 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { QRCodeCanvas } from "qrcode.react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Item, ItemStatus } from "@/types/database";
+import { Item, ClaimStatusValues } from "@/types/database";
+
+interface UserClaim {
+  id: string;
+  status: string;
+  claim_description: string;
+}
 
 interface ItemDetailActionsProps {
   item: Item;
-  user: any;
+  user: any; // Reverting to any for compatibility
   isOwner: boolean;
   itemUrl: string;
 }
 
-type ClaimStatus = "pending" | "approved" | "rejected" | "retracted";
+
 
 export default function ItemDetailActions({
   item,
@@ -27,7 +33,7 @@ export default function ItemDetailActions({
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
   const [claimSuccess, setClaimSuccess] = useState(false);
-  const [userClaim, setUserClaim] = useState<any>(null);
+  const [userClaim, setUserClaim] = useState<UserClaim | null>(null);
   const [pendingClaimsCount, setPendingClaimsCount] = useState<number>(0);
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -72,8 +78,9 @@ export default function ItemDetailActions({
       const { error } = await supabase.from("items").delete().eq("id", item.id);
       if (error) throw error;
       router.push("/");
-    } catch (err: any) {
-      setDeleteError(err.message || "Failed to delete item.");
+    } catch (err) {
+      const error = err as Error;
+      setDeleteError(error.message || "Failed to delete item.");
     } finally {
       setDeleting(false);
     }
@@ -272,7 +279,7 @@ export default function ItemDetailActions({
                     </span>
                   </div>
                   <blockquote className="bg-gray-900 rounded-lg p-3 text-gray-300 italic border-l-4 border-indigo-500 mb-3">
-                    "{userClaim.claim_description}"
+                    &quot;{userClaim.claim_description}&quot;
                   </blockquote>
                   {userClaim.status === "rejected" && (
                     <div className="flex items-center gap-2 text-sm text-red-300 bg-red-900 bg-opacity-30 p-3 rounded-lg border border-red-800">
