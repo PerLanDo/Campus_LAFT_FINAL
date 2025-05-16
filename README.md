@@ -47,6 +47,34 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to see the a
   - **Storage**: Create a bucket named `item-images` (public or with appropriate RLS policies)
 - Add your Supabase credentials to `.env.local`
 
+## Database Backups
+
+The project includes a robust database backup system with the following features:
+- Automated daily, weekly, and monthly backups
+- Retention policies to manage disk space
+- Easy restoration process
+
+### Setting Up Backups
+
+1. Navigate to the scripts directory:
+   ```bash
+   cd scripts
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env` file with your database connection details (see `scripts/backup/README.md` for details)
+
+4. Run a manual backup:
+   ```bash
+   npm run backup
+   ```
+
+For detailed information on scheduling automated backups and restoring from backups, see the [backup system documentation](scripts/backup/README.md).
+
 ## Scripts
 - `npm run dev` — Start the development server
 - `npm run build` — Build for production

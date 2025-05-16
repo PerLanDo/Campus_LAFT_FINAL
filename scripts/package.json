@@ -1,0 +1,21 @@
+{
+  "name": "campus-laft-backup",
+  "version": "1.0.0",
+  "description": "Database backup and restore utilities for CampusLAFT",
+  "main": "backup/backup.ts",
+  "scripts": {
+    "backup": "ts-node backup/backup.ts",
+    "restore": "ts-node backup/restore.ts",
+    "list": "ts-node -e \"import { listBackups } from './backup/restore'; listBackups().then(backups => console.log(backups));\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^16.0.0",
+    "pg": "^8.11.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

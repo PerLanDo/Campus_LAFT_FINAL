@@ -23,6 +23,21 @@ const nextConfig = {
     // Disable TypeScript error checking during production builds
     ignoreBuildErrors: true,
   },
+  async headers() {
+    return [{
+      source: '/(.*)',
+      headers: [
+        {
+          key: 'Content-Security-Policy',
+          value: `default-src 'self' *.supabase.co; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: *.supabase.co`
+        },
+        {
+          key: 'Strict-Transport-Security',
+          value: 'max-age=63072000; includeSubDomains; preload'
+        }
+      ]
+    }];
+  }
 };
 
 module.exports = nextConfig;

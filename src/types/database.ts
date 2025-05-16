@@ -72,6 +72,7 @@ export interface Profile {
   id: string;
   full_name: string | null;
   avatar_url: string | null;
-  mobile_number: string | null;
-  physical_address: string | null;
+  mobile_number: string; // Encrypted
+  physical_address: string; // Encrypted
+  email: string; // Encrypted
 }

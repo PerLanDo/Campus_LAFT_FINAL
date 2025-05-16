@@ -9,8 +9,6 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { CategoryNames, CategoryNamesValues, ItemStatusValues } from '@/types/database';
 import type { CategoryType, ItemStatus } from '@/types/database';
 import Image from 'next/image';
-import * as tf from '@tensorflow/tfjs';
-import * as cocoSsd from '@tensorflow-models/coco-ssd';
 
 export default function ReportPage() {
   const supabase = createSupabaseBrowserClient();
@@ -19,12 +17,9 @@ export default function ReportPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
-  // New state for image handling and AI
+  // State for image handling
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [aiLabels, setAiLabels] = useState<string[]>([]);
-  const [isDetecting, setIsDetecting] = useState(false);
-  const [tfModel, setTfModel] = useState<cocoSsd.ObjectDetection | null>(null);
 
   const {
     register,
@@ -61,48 +56,17 @@ export default function ReportPage() {
     getUser();
   }, [supabase, router]);
 
-  // Load TensorFlow model on mount
-  useEffect(() => {
-    const loadModel = async () => {
-      try {
-        await tf.ready();
-        const model = await cocoSsd.load();
-        setTfModel(model);
-      } catch (error) {
-        setServerError("AI features might be unavailable: Could not load image detection model.");
-      }
-    };
-    loadModel();
-  }, []);
 
-  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    setAiLabels([]);
+
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     clearErrors("imageFile");
     if (event.target.files) {
       const files = Array.from(event.target.files).slice(0, 5);
       setSelectedFiles(files);
       setImagePreviews(files.map(file => URL.createObjectURL(file)));
-      // Run COCO-SSD on the first image
-      if (files[0] && tfModel) {
-        setIsDetecting(true);
-        try {
-          const imgElement = document.createElement('img');
-          imgElement.src = URL.createObjectURL(files[0]);
-          await new Promise(resolve => imgElement.onload = resolve);
-          const predictions = await tfModel.detect(imgElement);
-          const labels = predictions.map(pred => pred.class);
-          setAiLabels(Array.from(new Set(labels)));
-        } catch (error) {
-          setServerError("Failed to detect objects in image.");
-          setAiLabels([]);
-        } finally {
-          setIsDetecting(false);
-        }
-      }
     } else {
       setImagePreviews([]);
       setSelectedFiles([]);
-      setAiLabels([]);
     }
   };
 
@@ -189,7 +153,6 @@ export default function ReportPage() {
       status: data.status,
       is_urgent: data.isUrgent || false,
       image_urls: imageUrls,
-      image_labels: aiLabels,
     };
 
     // 3. Insert item data
@@ -206,7 +169,6 @@ export default function ReportPage() {
       reset();
       setImagePreviews([]);
       setSelectedFiles([]);
-      setAiLabels([]);
     }
   };
 
@@ -337,20 +299,7 @@ export default function ReportPage() {
           )}
         </div>
 
-        {/* AI Detected Labels */}
-        {isDetecting && <p className="text-sm text-gray-600 dark:text-gray-400">Detecting objects in image...</p>}
-        {aiLabels.length > 0 && (
-          <div>
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Detected Objects:</p>
-            <div className="flex flex-wrap gap-2 mt-1">
-              {aiLabels.map(label => (
-                <span key={label} className="px-2 py-1 bg-blue-100 dark:bg-blue-700 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full">
-                  {label}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         <div className="flex items-center">
           <input
@@ -367,10 +316,10 @@ export default function ReportPage() {
         <div>
           <button
             type="submit"
-            disabled={isSubmitting || isDetecting}
+            disabled={isSubmitting}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
           >
-            {isSubmitting ? 'Submitting...' : (isDetecting ? 'Processing Image...' : 'Report Item')}
+            {isSubmitting ? 'Submitting...' : 'Report Item'}
           </button>
         </div>
       </form>

@@ -13,8 +13,6 @@
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
-    "@tensorflow-models/coco-ssd": "^2.2.3",
-    "@tensorflow/tfjs": "^4.22.0",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.510.0",
     "msu-iit-lost-and-found": "file:",
