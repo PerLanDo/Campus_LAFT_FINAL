@@ -8,8 +8,6 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Item, CategoryNames } from "@/types/database";
 
 import Image from "next/image";
-import * as tf from "@tensorflow/tfjs";
-import * as cocoSsd from "@tensorflow-models/coco-ssd";
 
 export default function EditItemPage() {
   const supabase = createClientComponentClient();
@@ -26,9 +24,6 @@ export default function EditItemPage() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
-  const [aiLabels, setAiLabels] = useState<string[]>([]);
-  const [isDetecting, setIsDetecting] = useState(false);
-  const [tfModel, setTfModel] = useState<cocoSsd.ObjectDetection | null>(null);
 
   const {
     register,
@@ -52,20 +47,6 @@ export default function EditItemPage() {
   });
 
   const currentStatus = watch('status');
-
-  // Load TensorFlow model on mount
-  useEffect(() => {
-    const loadModel = async () => {
-      try {
-        await tf.ready();
-        const model = await cocoSsd.load();
-        setTfModel(model);
-      } catch (error) {
-        setServerError("AI features might be unavailable: Could not load image detection model.");
-      }
-    };
-    loadModel();
-  }, []);
 
   // Fetch item and user on mount
   useEffect(() => {
@@ -108,36 +89,18 @@ export default function EditItemPage() {
         locationDescription: data.location_description || '',
         dateLostOrFound: data.date_lost_or_found || '',
       });
-      setAiLabels(data.image_labels || []);
+
       setLoading(false);
     };
     fetchData();
   }, [itemId, reset, router, supabase]);
 
-  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    setAiLabels([]);
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     clearErrors("imageFile");
     if (event.target.files) {
       const files = Array.from(event.target.files).slice(0, 5 - existingImageUrls.length);
       setSelectedFiles(files);
       setImagePreviews(files.map(file => URL.createObjectURL(file)));
-      // Optionally, run AI detection on the first image
-      if (files[0] && tfModel) {
-        setIsDetecting(true);
-        try {
-          const imgElement = document.createElement('img');
-          imgElement.src = URL.createObjectURL(files[0]);
-          await new Promise(resolve => imgElement.onload = resolve);
-          const predictions = await tfModel.detect(imgElement);
-          const labels = predictions.map(pred => pred.class);
-          setAiLabels(Array.from(new Set(labels)));
-        } catch (error) {
-          setServerError("Failed to detect objects in image.");
-          setAiLabels([]);
-        } finally {
-          setIsDetecting(false);
-        }
-      }
     } else {
       setImagePreviews([]);
       setSelectedFiles([]);
@@ -220,7 +183,6 @@ export default function EditItemPage() {
       status: data.status,
       is_urgent: data.isUrgent || false,
       image_urls: imageUrls,
-      image_labels: aiLabels.length > 0 ? aiLabels : null,
     };
     // Update item
     const { error: updateError } = await supabase.from('items').update(updateData).eq('id', itemId);
@@ -233,7 +195,6 @@ export default function EditItemPage() {
       setSuccessMessage('Item updated successfully!');
       setImagePreviews([]);
       setSelectedFiles([]);
-      setAiLabels([]);
       router.push(`/item/${itemId}`);
     }
   };
@@ -377,20 +338,7 @@ export default function EditItemPage() {
             </div>
           )}
         </div>
-        {/* AI Detected Labels */}
-        {isDetecting && <p className="text-sm text-gray-600 dark:text-gray-400">Detecting objects in image...</p>}
-        {aiLabels.length > 0 && (
-          <div>
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Detected Objects:</p>
-            <div className="flex flex-wrap gap-2 mt-1">
-              {aiLabels.map(label => (
-                <span key={label} className="px-2 py-1 bg-blue-100 dark:bg-blue-700 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full">
-                  {label}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+
         <div className="flex items-center">
           <input
             id="isUrgent"
@@ -405,10 +353,10 @@ export default function EditItemPage() {
         <div>
           <button
             type="submit"
-            disabled={isSubmitting || isDetecting}
+            disabled={isSubmitting}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
           >
-            {isSubmitting ? 'Saving...' : (isDetecting ? 'Processing Image...' : 'Save Changes')}
+            {isSubmitting ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </form>
