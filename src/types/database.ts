@@ -1,38 +1,48 @@
 // Category mapping for display purposes
 export const CategoryNames = {
-  'electronics': 'Electronics',
-  'apparel': 'Clothing',
-  'books': 'Books',
-  'stationery': 'Stationery',
-  'accessories': 'Accessories',
-  'documents': 'Documents',
-  'ids_cards': 'IDs & Cards',
-  'keys': 'Keys',
-  'other': 'Other'
+  electronics: "Electronics",
+  apparel: "Clothing",
+  books: "Books",
+  stationery: "Stationery",
+  accessories: "Accessories",
+  documents: "Documents",
+  ids_cards: "IDs & Cards",
+  keys: "Keys",
+  other: "Other",
 } as const;
 
 // Create value arrays for runtime use
 export const CategoryNamesValues = [
-  'electronics',
-  'apparel',
-  'books',
-  'stationery',
-  'accessories',
-  'documents',
-  'ids_cards',
-  'keys',
-  'other'
+  "electronics",
+  "apparel",
+  "books",
+  "stationery",
+  "accessories",
+  "documents",
+  "ids_cards",
+  "keys",
+  "other",
 ] as const;
 
 export type CategoryType = keyof typeof CategoryNames;
 
 // Define both type and values for ItemStatus
-export type ItemStatus = 'lost' | 'found' | 'claimed' | 'archived';
-export const ItemStatusValues: ItemStatus[] = ['lost', 'found', 'claimed', 'archived'];
+export type ItemStatus = "lost" | "found" | "claimed" | "archived";
+export const ItemStatusValues: ItemStatus[] = [
+  "lost",
+  "found",
+  "claimed",
+  "archived",
+];
 
 // Define both type and values for ClaimStatus
-export type ClaimStatus = 'pending' | 'approved' | 'rejected' | 'retracted';
-export const ClaimStatusValues: ClaimStatus[] = ['pending', 'approved', 'rejected', 'retracted'];
+export type ClaimStatus = "pending" | "approved" | "rejected" | "retracted";
+export const ClaimStatusValues: ClaimStatus[] = [
+  "pending",
+  "approved",
+  "rejected",
+  "retracted",
+];
 
 export interface Item {
   id: string;
@@ -66,6 +76,7 @@ export interface Claim {
   date_claimed: string;
   date_resolved?: string | null;
   resolved_by_user_id?: string | null;
+  turn_in_to_security?: boolean; // New flag for campus security handover
 }
 
 export interface Profile {

@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { QRCodeCanvas } from "qrcode.react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Item, ClaimStatusValues } from "@/types/database";
+import { Item } from "@/types/database";
+import type { Profile } from "@/types/database";
 
 interface UserClaim {
   id: string;
@@ -14,12 +15,10 @@ interface UserClaim {
 
 interface ItemDetailActionsProps {
   item: Item;
-  user: any; // Reverting to any for compatibility
+  user: Profile | null; // user profile with full_name and email fields
   isOwner: boolean;
   itemUrl: string;
 }
-
-
 
 export default function ItemDetailActions({
   item,
@@ -29,6 +28,7 @@ export default function ItemDetailActions({
 }: ItemDetailActionsProps) {
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [claimText, setClaimText] = useState("");
+  const [turnInToSecurity, setTurnInToSecurity] = useState(false); // new flag
   const [claimError, setClaimError] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
@@ -109,7 +109,7 @@ export default function ItemDetailActions({
         item_id: item.id,
         claimer_id: user.id,
         claim_description: claimText,
-        // status: 'pending' (default in DB)
+        turn_in_to_security: turnInToSecurity, // flag for security handover
       })
       .select();
     if (error) {
@@ -356,6 +356,17 @@ export default function ItemDetailActions({
                       value={claimText}
                       onChange={(e) => setClaimText(e.target.value)}
                     />
+                    <label className="flex items-center gap-2 mb-4">
+                      <input
+                        type="checkbox"
+                        checked={turnInToSecurity}
+                        onChange={(e) => setTurnInToSecurity(e.target.checked)}
+                        className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                      />
+                      <span className="text-gray-300 text-sm">
+                        I will turn this item in to campus security
+                      </span>
+                    </label>
                     {claimError && (
                       <div className="flex items-center gap-2 text-red-300 bg-red-900 bg-opacity-30 p-3 rounded-lg border border-red-800 mb-4">
                         <svg

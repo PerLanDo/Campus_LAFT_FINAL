@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
+    "campus-laft-backup": "file:",
     "dotenv": "^16.0.0",
     "pg": "^8.11.3",
     "ts-node": "^10.9.1",
