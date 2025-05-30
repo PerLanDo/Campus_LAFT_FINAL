@@ -183,6 +183,7 @@ export default function EditItemPage() {
       status: data.status,
       is_urgent: data.isUrgent || false,
       image_urls: imageUrls,
+      turn_in_to_security: data.turnInToSecurity || false,
     };
     // Update item
     const { error: updateError } = await supabase.from('items').update(updateData).eq('id', itemId);
@@ -350,6 +351,20 @@ export default function EditItemPage() {
             Mark as Urgent (e.g., ID, Keys, Wallet)
           </label>
         </div>
+        {/* Turn in to Lost and Found desk checkbox (only for found items) */}
+        {currentStatus === 'found' && (
+          <div className="flex items-center">
+            <input
+              id="turnInToSecurity"
+              type="checkbox"
+              {...register('turnInToSecurity')}
+              className="h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500 dark:bg-gray-700"
+            />
+            <label htmlFor="turnInToSecurity" className="ml-2 block text-sm text-gray-900 dark:text-gray-200">
+              I will turn this item in to the Lost and Found desk.
+            </label>
+          </div>
+        )}
         <div>
           <button
             type="submit"

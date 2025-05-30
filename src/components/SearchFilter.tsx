@@ -26,7 +26,7 @@ export function SearchFilter({ onFilterApply }: { onFilterApply: (filters: Filte
   ];
 
   const STATUS_OPTIONS = [
-    'Lost', 'Found', 'Claimed', 'Pending'
+    'Claimed', 'Pending', 'Secured'
   ];
 
   return (

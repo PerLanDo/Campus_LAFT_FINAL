@@ -2,21 +2,8 @@
 
 import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { ClaimStatus, ItemStatus, Profile } from "@/types/database";
+import { ItemStatus, ClaimWithClaimerProfile } from "@/types/database";
 import { format } from "date-fns";
-
-interface ClaimWithClaimerProfile {
-  id: string;
-  item_id: string;
-  claimer_id: string;
-  claim_description: string;
-  status: ClaimStatus;
-  date_claimed: string;
-  date_resolved?: string | null;
-  resolved_by_user_id?: string | null;
-  turn_in_to_security: boolean; // new flag
-  claimer: Pick<Profile, "id" | "full_name" | "avatar_url"> | null;
-}
 
 interface ManageClaimsClientProps {
   itemId: string;

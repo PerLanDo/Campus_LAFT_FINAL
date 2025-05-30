@@ -24,7 +24,8 @@ export default function ProfilePage() {
   const [fullNameInput, setFullNameInput] = useState('');
   const [mobileNumberInput, setMobileNumberInput] = useState('');
   const [physicalAddressInput, setPhysicalAddressInput] = useState('');
-  // const [avatarFile, setAvatarFile] = useState<File | null>(null); // Avatar feature removed
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
@@ -68,6 +69,9 @@ export default function ProfilePage() {
           setFullNameInput(profileData.full_name || '');
           setMobileNumberInput(profileData.mobile_number || '');
           setPhysicalAddressInput(profileData.physical_address || '');
+          if (profileData.avatar_url) {
+            setAvatarPreview(profileData.avatar_url);
+          }
         }
         
         // Get user statistics
@@ -113,11 +117,20 @@ export default function ProfilePage() {
       setPhysicalAddressInput(profile.physical_address || '');
       setNewPassword('');
       setConfirmPassword('');
-      // setAvatarFile(null); // Avatar feature removed
+      setAvatarFile(null);
+      setAvatarPreview(profile.avatar_url || null);
     }
   };
   
-  // const handleAvatarChange = ...; // Avatar feature removed: function definition removed.
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setAvatarFile(file);
+    if (file) {
+      setAvatarPreview(URL.createObjectURL(file));
+    } else {
+      setAvatarPreview(profile?.avatar_url || null);
+    }
+  };
   
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,14 +166,37 @@ export default function ProfilePage() {
         }
       }
       
-      // Avatar upload logic removed.
+      let avatar_url = profile?.avatar_url || null;
+      if (avatarFile) {
+        // Validate file type/size
+        const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+        if (!allowedTypes.includes(avatarFile.type)) {
+          setUpdateError("Only JPG, PNG, and WEBP images are allowed for avatar.");
+          return;
+        }
+        if (avatarFile.size > 5 * 1024 * 1024) {
+          setUpdateError("Avatar image must be less than 5MB.");
+          return;
+        }
+        // Upload to Supabase Storage
+        const fileExt = avatarFile.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage.from('avatars').upload(fileName, avatarFile, { upsert: true });
+        if (uploadError) {
+          setUpdateError("Failed to upload avatar: " + uploadError.message);
+          return;
+        }
+        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path);
+        avatar_url = urlData.publicUrl;
+      }
       
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
           full_name: fullNameInput || null,
           mobile_number: mobileNumberInput || null,
-          physical_address: physicalAddressInput || null
+          physical_address: physicalAddressInput || null,
+          avatar_url: avatar_url || null,
         })
         .eq('id', user.id);
       
@@ -184,7 +220,8 @@ export default function ProfilePage() {
       setEditMode(false);
       setNewPassword('');
       setConfirmPassword('');
-      // setAvatarFile(null); // Avatar feature removed, so this call is no longer needed
+      setAvatarFile(null);
+      setAvatarPreview(refreshedProfile?.avatar_url || null);
       setUpdateMessage('Profile updated successfully!');
       
     } catch (error) {
@@ -231,9 +268,13 @@ export default function ProfilePage() {
         {/* Avatar and basic info */}
         <div className="flex flex-col items-center sm:flex-row sm:items-start mb-6">
           <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 mb-4 sm:mb-0 sm:mr-6 flex items-center justify-center">
-            <div className="text-gray-500 dark:text-gray-400 text-4xl font-bold">
-              {profile?.full_name ? profile.full_name[0].toUpperCase() : user?.email?.[0]?.toUpperCase() || '?'}
-            </div>
+            {avatarPreview ? (
+              <Image src={avatarPreview} alt="Avatar" fill className="object-cover" />
+            ) : (
+              <div className="text-gray-500 dark:text-gray-400 text-4xl font-bold">
+                {profile?.full_name ? profile.full_name[0].toUpperCase() : user?.email?.[0]?.toUpperCase() || '?'}
+              </div>
+            )}
           </div>
           
           <div>
@@ -332,7 +373,23 @@ export default function ProfilePage() {
                 />
               </div>
               
-              {/* Avatar file input removed previously */}
+              {editMode && (
+                <div className="mb-4">
+                  <label htmlFor="avatarFile" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile Picture (JPG, PNG, WEBP, max 5MB)</label>
+                  <input
+                    type="file"
+                    id="avatarFile"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleAvatarChange}
+                    className="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400"
+                  />
+                  {avatarPreview && (
+                    <div className="mt-2 w-24 h-24 relative">
+                      <Image src={avatarPreview} alt="Avatar Preview" fill className="object-cover rounded-full" />
+                    </div>
+                  )}
+                </div>
+              )}
               
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
                 <h4 className="text-md font-medium text-gray-800 dark:text-white mb-3">Change Password (Optional)</h4>

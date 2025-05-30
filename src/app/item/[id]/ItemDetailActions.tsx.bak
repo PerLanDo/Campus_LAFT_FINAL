@@ -1,0 +1,40 @@
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { QRCodeCanvas } from "qrcode.react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { Item } from "@/types/database";
+import type { User } from "@supabase/supabase-js";
+
+interface UserClaim {
+  id: string;
+  status: string;
+  claim_description: string;
+}
+
+interface ItemDetailActionsProps {
+  item: Item;
+  user: User | null; // Changed from Profile | null to User | null
+  isOwner: boolean;
+  itemUrl: string;
+}
+
+export default function ItemDetailActions({
+  item,
+  user,
+  isOwner,
+  itemUrl,
+}: ItemDetailActionsProps) {
+  const [showClaimModal, setShowClaimModal] = useState(false);
+  const [claimText, setClaimText] = useState("");
+  const [claimError, setClaimError] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  const [claimSuccess, setClaimSuccess] = useState(false);
+  const [userClaim, setUserClaim] = useState<UserClaim | null>(null);
+  const [pendingClaimsCount, setPendingClaimsCount] = useState<number>(0);
+  const router = useRouter();
+  const supabase = createClientComponentClient();
+
+  // Rest of the component code...

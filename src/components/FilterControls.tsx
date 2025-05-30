@@ -29,7 +29,7 @@ export function FilterControls({ onFilterChange }: FilterControlsProps) {
 
   // Match database status enum
   const STATUS_OPTIONS = [
-    'lost', 'found', 'claimed', 'archived'
+    'claimed', 'archived', 'secured'
   ];
 
   const handleFilterChange = (newFilters: Partial<FilterState>) => {
